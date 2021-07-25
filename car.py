@@ -50,6 +50,25 @@ class Car:
         self.world = world
         self.client = client
 
+        # Sensor noise profile 
+        NOISE_STDDEV = 5e-5
+        NOISE_BIAS = 1e-5
+        NOISE_IMU_ACC_X_STDDEV = NOISE_STDDEV
+        NOISE_IMU_ACC_Y_STDDEV = NOISE_STDDEV
+        NOISE_IMU_ACC_Z_STDDEV = NOISE_STDDEV
+        NOISE_IMU_GYRO_X_BIAS = NOISE_BIAS
+        NOISE_IMU_GYRO_X_STDDEV = NOISE_STDDEV
+        NOISE_IMU_GYRO_Y_BIAS = NOISE_BIAS
+        NOISE_IMU_GYRO_Y_STDDEV = NOISE_STDDEV
+        NOISE_IMU_GYRO_Z_BIAS = NOISE_BIAS
+        NOISE_IMU_GYRO_Z_STDDEV = NOISE_STDDEV
+        NOISE_GNSS_ALT_BIAS = NOISE_BIAS
+        NOISE_GNSS_ALT_STDDEV = NOISE_STDDEV
+        NOISE_GNSS_LAT_BIAS = NOISE_BIAS
+        NOISE_GNSS_LAT_STDDEV = NOISE_STDDEV
+        NOISE_GNSS_LON_BIAS = NOISE_BIAS
+        NOISE_GNSS_LON_STDDEV = NOISE_STDDEV
+        
         # Initialize the vehicle and the sensors
         bp_lib = world.get_blueprint_library()
         vehicle_bp = bp_lib.filter('model3')[0]
@@ -57,9 +76,31 @@ class Car:
         imu_bp = bp_lib.filter("sensor.other.imu")[0]
         gnss_bp = bp_lib.filter("sensor.other.gnss")[0]
 
+        # Set sensors' noise
+        imu_bp.set_attribute('noise_accel_stddev_x', str(NOISE_IMU_ACC_X_STDDEV))
+        imu_bp.set_attribute('noise_accel_stddev_y', str(NOISE_IMU_ACC_Y_STDDEV))
+        imu_bp.set_attribute('noise_accel_stddev_z', str(NOISE_IMU_ACC_Z_STDDEV))
+        imu_bp.set_attribute('noise_gyro_stddev_x', str(NOISE_IMU_GYRO_X_STDDEV))
+        imu_bp.set_attribute('noise_gyro_stddev_y', str(NOISE_IMU_GYRO_Y_STDDEV))
+        imu_bp.set_attribute('noise_gyro_stddev_z', str(NOISE_IMU_GYRO_Z_STDDEV))
+        imu_bp.set_attribute('noise_gyro_bias_x', str(NOISE_IMU_GYRO_X_BIAS))
+        imu_bp.set_attribute('noise_gyro_bias_y', str(NOISE_IMU_GYRO_Y_BIAS))
+        imu_bp.set_attribute('noise_gyro_bias_z', str(NOISE_IMU_GYRO_Z_BIAS))
+        gnss_bp.set_attribute('noise_alt_bias', str(NOISE_GNSS_ALT_BIAS))
+        gnss_bp.set_attribute('noise_alt_stddev', str(NOISE_GNSS_ALT_STDDEV))
+        gnss_bp.set_attribute('noise_lat_bias', str(NOISE_GNSS_LAT_BIAS))
+        gnss_bp.set_attribute('noise_lat_stddev', str(NOISE_GNSS_LAT_STDDEV))
+        gnss_bp.set_attribute('noise_lon_bias', str(NOISE_GNSS_LON_BIAS))
+        gnss_bp.set_attribute('noise_lon_stddev', str(NOISE_GNSS_LON_STDDEV))
+
+        # Sensor sampling frequency
+        IMU_FREQ = 200
+        GNSS_FREQ = 5
+        imu_bp.set_attribute('sensor_tick', str(1.0 / IMU_FREQ))
+        gnss_bp.set_attribute('sensor_tick', str(1.0 / GNSS_FREQ))
+
         self.vehicle = world.spawn_actor(vehicle_bp, spawn_point)
-        # self.vehicle.apply_control(carla.VehicleControl(throttle=1.0, steer=0.0))
-        self.vehicle.set_autopilot(True) # False
+        self.vehicle.set_autopilot(True)
 
         self.camera = world.spawn_actor(
             blueprint=camera_bp,
@@ -186,7 +227,8 @@ class Car:
                 break
 
             self.gnss_queue.task_done()
-                
+        
+
         return sensors
 
     def gnss_to_xyz(self, latitude, longitude, altitude):
