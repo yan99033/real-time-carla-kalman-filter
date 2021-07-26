@@ -1,5 +1,5 @@
-# Author: Shing-Yan Loo (lsyan@ualberta.ca)
-# Visualize the sensor readings
+# Author: Shing-Yan Loo (yan99033@gmail.com)
+# Visualize the sensor readings and vehicle trajectory
 
 import matplotlib
 matplotlib.use('Qt5Agg')
