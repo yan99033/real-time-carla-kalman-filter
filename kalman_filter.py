@@ -4,7 +4,7 @@
 # Credit: State Estimation and Localization for Self-Driving Cars by Coursera
 #   Please consider enrolling the course if you find this tutorial helpful and  
 #   would like to learn more about Kalman filter and state estimation for 
-#   self-drivingcars in general.
+#   self-driving cars in general.
 
 from matplotlib.pyplot import axis
 import numpy as np
