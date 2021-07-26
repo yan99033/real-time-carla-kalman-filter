@@ -36,6 +36,7 @@ In essense, Kalman filter is a way to extract accurate information out of inaccu
 * CARLA (tested 0.9.11)
 * Python 3.7
 * pygame (>=2.0)
+* Matplotlib (tested 3.1.3)
 
 ## Tested environment
 * Ubuntu 20.04
