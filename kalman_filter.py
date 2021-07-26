@@ -56,7 +56,7 @@ class ExtendedKalmanFilter:
         """Initialize the vehicle state using gnss sensor
 
         Note that this is going to be a very crude initialization by taking 
-        an average of 5 readings to get the absolute position of the car. A 
+        an average of 10 readings to get the absolute position of the car. A 
         better initialization technique could be employed to better estimate
         the initial vehicle state
 
