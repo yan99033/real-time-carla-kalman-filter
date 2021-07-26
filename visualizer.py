@@ -87,15 +87,18 @@ def visualizer(visual_msg_queue, quit):
 
     # Expand the plot when needed
     pose_plot.autoscale()
-    # pose_plot.set_zlim([-2, 10])
 
     # Trajectory length limit
+    # Would remove the oldest point as soon as the list reaches the maximum length (sliding window)
     max_traj_len = 50000
 
     # Keep vehicle trajectories
     gt_traj_x = []
     gt_traj_y = []
     gt_traj_z = []
+    est_traj_x = []
+    est_traj_y = []
+    est_traj_z = []
 
     # GPS trajectory
     gnss_traj_x = []
@@ -113,6 +116,8 @@ def visualizer(visual_msg_queue, quit):
     gyro_y_all = []
     gyro_z_all = []
 
+    # Font size
+    fontsize = 14
 
     # make sure the window is raised, but the script keeps going
     plt.show(block=False)
@@ -124,16 +129,28 @@ def visualizer(visual_msg_queue, quit):
         
         msg = visual_msg_queue.get()
 
-        # Visualize vehicle trajectory
+        # Update trajectory
+        updated_traj = False
         if msg.get('gt_traj') is not None:
             gt_pos = msg['gt_traj']
             add_to_traj(gt_traj_x, gt_traj_y, gt_traj_z, gt_pos[0], gt_pos[1], gt_pos[2], max_traj_len)
+            updated_traj = True
+        if msg.get('est_traj') is not None:
+            est_pos = msg['est_traj']
+            add_to_traj(est_traj_x, est_traj_y, est_traj_z, est_pos[0], est_pos[1], est_pos[2], max_traj_len)
+            updated_traj = True
 
+        # Visualize vehicle trajectory
+        if updated_traj:
             # Clear previous plot
             pose_plot.cla()
 
-            # Update vehicle trajectory
-            pose_plot.plot(gt_traj_x, gt_traj_y, gt_traj_z, color='green', linestyle='solid')
+            # Update plot
+            pose_plot.plot(gt_traj_x, gt_traj_y, gt_traj_z, color='green', linestyle='solid', label='GT')
+            pose_plot.plot(est_traj_x, est_traj_y, est_traj_z, color='blue', linestyle='solid', label='est')
+            pose_plot.legend(fontsize=fontsize)
+
+
 
         # Visualize IMU reading
         if msg.get('imu') is not None:
@@ -153,13 +170,13 @@ def visualizer(visual_msg_queue, quit):
             imu_plot.cla()
 
             # Update IMU reading
-            imu_plot.plot(ts_imu, acc_x_all, label='imu_x')
-            imu_plot.plot(ts_imu, acc_y_all, label='imu_y')
-            imu_plot.plot(ts_imu, acc_z_all, label='imu_z')
+            imu_plot.plot(ts_imu, acc_x_all, label='acc_x')
+            imu_plot.plot(ts_imu, acc_y_all, label='acc_y')
+            imu_plot.plot(ts_imu, acc_z_all, label='acc_z')
             imu_plot.plot(ts_imu, gyro_x_all, label='gyro_x')
             imu_plot.plot(ts_imu, gyro_y_all, label='gyro_y')
             imu_plot.plot(ts_imu, gyro_z_all, label='gyro_z')
-            imu_plot.legend(fontsize=14)
+            imu_plot.legend(fontsize=fontsize)
 
         # Visualize GNSS reading
         if msg.get('gnss') is not None:
@@ -170,7 +187,8 @@ def visualizer(visual_msg_queue, quit):
             gnss_plot.cla()
 
             # Update GNSS reading
-            gnss_plot.plot(gnss_traj_x, gnss_traj_y, gnss_traj_z, color='black', linestyle='solid')
+            gnss_plot.plot(gnss_traj_x, gnss_traj_y, gnss_traj_z, color='black', linestyle='solid', label='GNSS')
+            gnss_plot.legend(fontsize=fontsize)
         
         # flush any pending GUI events, re-painting the screen if needed
         fig.canvas.flush_events()
